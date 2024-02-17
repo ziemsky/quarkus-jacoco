@@ -1,67 +1,27 @@
-# quarkus-lambda-http
+# Quarkus with JaCoco demo
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+Sandbox for experiments with configuration of JaCoCo with Quarkus.
 
-If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
+## The setup 
 
-## Running the application in dev mode
+Class [ExampleResource.java](src/main/java/com/ziemsky/lambdahttp/ExampleResource.java) exposes JAX-RS API. It contains two methods: one executed from [unit test](src/test/groovy/com/ziemsky/lambdahttp/ExampleResourceSpec.groovy) (Spock specification), and another executed from `@QuarkusTest`-annotated [test class](integration-test/java/com/ziemsky/lambdahttp/ExampleResourceQuarkusIT.java).
 
-You can run your application in dev mode that enables live coding using:
+Unit tests are executed by `maven-surefire-plugin`, and `@QuarkusTest`-annotated tests are executed through `maven-failsafe-plugin`.
 
-```shell script
-./mvnw compile quarkus:dev
+`@QuarkusTest`-annotated class is located in `integration-test` directory, and `build-helper-maven-plugin` is used to include it compilation of test classes. `gmavenplus-plugin` does the same for `*Spec.groovy` classes. All compiled test class files end up aggregated under [target/test-classes](target/test-classes), where both plugins invoke them from (Surefire invokes `*Spec` classes, and Failsafe invokes `*IT` classes). 
+
+## JaCoCo
+
+...is configured to instrument classes both for 'pure' unit tests (`Spec`s) and `@QuarkusTest-annotated` tests. 
+
+The configuration is done exclusively through Surefire and Failsafe Maven plugins, and does not rely on [Quarkus JaCoCo extension](https://quarkus.io/guides/tests-with-coverage).
+
+## To run
+Execute:
+```shell
+mvn clean verify
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at http://localhost:8080/q/dev/.
+...then see JaCoCo coverage reports in [target/site/jacoco/index.html](target/site/jacoco/index.html).
 
-## Packaging and running the application
-
-The application can be packaged using:
-
-```shell script
-./mvnw package
-```
-
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
-
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
-
-If you want to build an _über-jar_, execute the following command:
-
-```shell script
-./mvnw package -Dquarkus.package.type=uber-jar
-```
-
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
-
-## Creating a native executable
-
-You can create a native executable using:
-
-```shell script
-./mvnw package -Dnative
-```
-
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
-
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
-```
-
-You can then execute your native executable with: `./target/quarkus-lambda-http-1.0-SNAPSHOT-runner`
-
-If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.
-
-## Related Guides
-
-- Jacoco - Code Coverage ([guide](https://quarkus.io/guides/tests-with-coverage)): Jacoco test coverage support
-- RESTEasy Classic ([guide](https://quarkus.io/guides/resteasy)): REST endpoint framework implementing Jakarta REST and more
-
-## Provided Code
-
-### RESTEasy JAX-RS
-
-Easily start your RESTful Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started#the-jax-rs-resources)
+Note that both methods in [ExampleResource.java](src/main/java/com/ziemsky/lambdahttp/ExampleResource.java) are reported as covered.
